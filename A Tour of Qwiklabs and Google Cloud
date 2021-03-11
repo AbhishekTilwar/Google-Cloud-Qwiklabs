@@ -1,0 +1,11 @@
+#Step: Search for Dialogflow API and ENABLE IT
+
+gcloud auth list
+touch test.txt
+ls
+nano test.txt
+
+#Step:enter the Text in the terminal
+"Google Cloud and Qwiklabs are the best!"
+
+cat test.txt
