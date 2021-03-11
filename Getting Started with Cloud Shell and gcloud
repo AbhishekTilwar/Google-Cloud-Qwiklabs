@@ -1,0 +1,13 @@
+gcloud auth list
+gcloud config list project
+gcloud config get-value compute/zone
+gcloud config get-value compute/region
+
+gcloud compute project-info describe --project <your_project_ID>
+export PROJECT_ID=<your_project_ID> 
+echo $PROJECT_ID
+export ZONE=<your_zone>
+echo $PROJECT_ID
+echo $ZONE
+
+gcloud compute instances create gcelab2 --machine-type n1-standard-2 --zone $ZONE
