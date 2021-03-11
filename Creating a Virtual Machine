@@ -1,0 +1,13 @@
+gcloud auth list
+gcloud config list project
+
+#Task 2: Install an NGINX web server
+sudo su -
+apt-get update
+apt-get install nginx -y
+ps auwx | grep nginx
+
+#Task 3: Create a new instance with gcloud
+gcloud compute instances create gcelab2 --machine-type n1-standard-2 --zone us-central1-c
+gcloud compute instances create --help
+gcloud compute ssh gcelab2 --zone us-central1-c
