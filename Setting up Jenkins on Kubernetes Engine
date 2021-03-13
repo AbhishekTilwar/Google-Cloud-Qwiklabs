@@ -1,0 +1,23 @@
+gcloud auth list
+gcloud config list project
+gcloud config set compute/zone us-east1-d
+git clone https://github.com/GoogleCloudPlatform/continuous-deployment-on-kubernetes.git
+cd continuous-deployment-on-kubernetes
+gcloud container clusters create jenkins-cd \
+--num-nodes 2 \
+--machine-type n1-standard-2 \
+--scopes "https://www.googleapis.com/auth/projecthosting,cloud-platform"
+
+gcloud container clusters list
+gcloud container clusters get-credentials jenkins-cd
+kubectl cluster-info
+
+helm repo add stable https://charts.helm.sh/stable
+helm repo update
+helm install cd stable/jenkins -f jenkins/values.yaml --version 1.2.2 --wait
+kubectl get pods
+export POD_NAME=$(kubectl get pods --namespace default -l "app.kubernetes.io/component=jenkins-master" -l "app.kubernetes.io/instance=cd" -o jsonpath="{.items[0].metadata.name}")
+kubectl port-forward $POD_NAME 8080:8080 >> /dev/null &
+kubectl get svc
+
+printf $(kubectl get secret cd-jenkins -o jsonpath="{.data.jenkins-admin-password}" | base64 --decode);echo
