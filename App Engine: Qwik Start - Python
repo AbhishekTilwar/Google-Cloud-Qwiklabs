@@ -1,0 +1,18 @@
+gcloud auth list
+gcloud config list project
+
+#In the left menu click APIs & Services > Library. & Search, Click App Engine Admin API. Click Enable. 
+
+gsutil -m cp -r gs://spls/gsp067/python-docs-samples .
+cd python-docs-samples/appengine/standard_python3/hello_world
+dev_appserver.py app.yaml
+
+#Click the + next to your Cloud Shell tab to open a new command line session.
+cd python-docs-samples/appengine/standard_python3/hello_world
+nano main.py
+-> Change "Hello, World!" to "Hello, Cruel World!". Exit and save the file.
+
+gcloud app deploy
+gcloud app browse
+
+
