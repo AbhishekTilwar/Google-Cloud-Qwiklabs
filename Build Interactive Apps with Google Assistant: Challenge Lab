@@ -1,0 +1,86 @@
+Build Interactive Apps with Google Assistant: Challenge Lab
+
+Task 1: 
+
+Create cloud function as per the code and the settings, make sure shared to allUsers (check unauthenticated invocations) and name magic_eight_ball.
+
+
+Task 2: 
+
+Open https://console.actions.google.com/
+
+Click New Project (accept T&Cs)
+
+Choose the first project and click import project
+
+Click Actions Console | your project
+
+Click decide how your action is invoked
+
+Add a display name with your initials + magic 8 ball
+
+Click Save
+
+Click actions | get started | build
+
+Accept t&c/sign in to dialogflow
+
+Click create
+
+Click fulfillment
+
+Enable webhook
+
+Copy and paste the cloud function http trigger url
+
+Click Save
+
+Click Intents
+
+Click default welcome intent
+
+Delete all text responses
+
+Add the text response Welcome to the lab magic 8 ball, ask me a yes or no question and I will predict the future!
+
+Click Save
+
+Click Intents
+
+Click default fallback intent
+
+Delete all the responses
+
+enable Set this intent as end of conversation and enable Enable webhook call for this intent
+
+Click Save
+
+Switch to the develop browser tab
+
+Click test
+
+Click visit activity controls
+
+Enable Web & App Activity
+
+Click turn on
+
+Click on the test browser tab
+
+Test the interaction, click talk to the magic eight ball, use Will I complete this challenge lab?
+
+It will return a random reply.
+
+Task 3: 
+
+Switch to cloud function, edit the function, and add the code to the line after 
+ magic_eight_ball_response = random.choice(choices)
+   
+  Click Deploy
+
+Switch to test and try the app again using the following  lines
+•	我会完成这个挑战实验室吗？
+•	¿Completaré este laboratorio de desafío?
+•	இந்த சவால் ஆய்வகத்தை நான் முடிக்கலாமா?
+Each line should reply in the same language
+
