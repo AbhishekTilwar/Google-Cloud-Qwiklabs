@@ -1,0 +1,22 @@
+#TASK 1:
+gcloud auth list
+gcloud config list project
+virtualenv -p python3 vrenv
+source vrenv/bin/activate
+git clone https://github.com/GoogleCloudPlatform/training-data-analyst
+cd ~/training-data-analyst/courses/developingapps/python/datastore/start
+export GCLOUD_PROJECT=$DEVSHELL_PROJECT_ID
+pip install -r requirements.txt
+python run_server.py
+->press Ctrl+c
+gcloud app create --region "us-central"
+
+#TASK 2:
+->Open the ...quiz/gcp/datastore.py
+->Replace by Updated datastore.py
+
+python run_server.py
+
+->In Cloud Shell, click Web preview > Preview on port 8080 to preview the quiz application.
+
+->Click Create Question.
