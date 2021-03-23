@@ -111,3 +111,8 @@ WHERE
   EXTRACT(YEAR FROM start_time) = 2019
   AND subscriber_type = 'Single Trip'
   AND start_station_name = '21st & Speedway @PCL'))
+  
+  
+  
+  
+ ### For More Reference: https://klauswong.medium.com/create-ml-models-with-bigquery-ml-challenge-lab-walkthrough-dd38e387b6d8
