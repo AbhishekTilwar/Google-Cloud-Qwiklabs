@@ -39,6 +39,8 @@ SELECT
 FROM `bigquery-public-data.austin_bikeshare.bikeshare_trips` AS trips
 WHERE EXTRACT(YEAR FROM start_time) = 2018
 
+
+
 Task 4: Evaluate the two machine learning models
 
 SELECT
