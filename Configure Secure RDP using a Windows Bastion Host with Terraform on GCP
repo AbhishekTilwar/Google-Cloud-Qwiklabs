@@ -1,0 +1,186 @@
+## Deploy the infrastructure on GCP with Terraform
+# Verifying Terraform Installation
+
+# Check the current Terraform version
+terraform --version
+
+# Download Terraform
+wget https://releases.hashicorp.com/terraform/0.11.11/terraform_0.11.11_linux_amd64.zip
+
+# Unzip Terraform
+unzip terraform_0.11.11_linux_amd64.zip
+
+# Set the PATH environmental variable to Terraform binaries:
+export PATH="$PATH:$HOME/terraform"
+cd /usr/bin
+sudo ln -s $HOME/terraform
+cd $HOME
+source ~/.bashrc
+
+# Create a directory for your Terraform configuration
+terraform --version
+
+#Create Terraform Configuration Files
+mkdir tfnet
+cd tfnet
+
+#Create a new file called provider.tf and copy the code below into the file
+provider "google" {}
+
+
+
+
+## Configurations for the non-default VPC securenetwork and its subnet and firewall rules
+
+# Create the securenetwork network
+resource "google_compute_network" "securenetwork" {
+name = "securenetwork"
+auto_create_subnetworks = "false"
+}
+
+# Add a subnet to securenetwork
+# Add subnet to the VPC network.
+
+# Create subnet subnetwork
+resource "google_compute_subnetwork" "securenetwork" {
+name          = "securenetwork"
+region        = "us-central1"
+network       = "${google_compute_network.securenetwork.self_link}"
+ip_cidr_range = "10.130.0.0/20"
+}
+
+# Configure the firewall rule
+# Define a firewall rule to allow HTTP, SSH, and RDP traffic on securenetwork.
+
+resource "google_compute_firewall" "bastionbost-allow-rdp" {
+name = "bastionbost-allow-rdp"
+network = "${google_compute_network.securenetwork.self_link}"
+target_tags = ["bastion"]
+allow {
+    protocol = "tcp"
+    ports    = ["3389"]
+	}
+}
+
+resource "google_compute_firewall" "securenetwork-allow-rdp" {
+name = "securenetwork-allow-rdp"
+network = "${google_compute_network.securenetwork.self_link}"
+source_ranges = "10.130.0.0/20"
+allow {
+    protocol = "tcp"
+    ports    = ["3389"]
+	}
+}
+
+# Create the vm-securehost instance
+module "vm-securehost" {
+  source           = "./securehost"
+  instance_name    = "vm-securehost"
+  instance_zone    = "us-central1-a"
+  instance_tags = "secure"
+  instance_subnetwork = "${google_compute_subnetwork.securenetwork.self_link}"
+}
+
+# Create the vm-bastionhost instance
+module "vm-bastionhost" {
+  source           = "./bastionhost"
+  instance_name    = "vm-bastionhost"
+  instance_zone    = "us-central1-a"
+  instance_tags = "bastion"
+  instance_subnetwork = "${google_compute_subnetwork.securenetwork.self_link}"
+}
+
+
+
+
+
+
+
+# Configurations for the instance vm-securehost
+# Make a new directory called securehost.
+# Create a new file called main.tf inside the securehost directory, and copy the following into the file,
+
+# Code inside securehost/main.tf
+variable "instance_name" {
+  }
+variable "instance_zone" {
+  default = "us-central1-a"
+  }
+variable "instance_type" {
+  default = "n1-standard-1"
+  }
+variable "instance_subnetwork" {
+}
+variable "instance_tags" {
+  }
+
+resource "google_compute_instance" "vm_instance" {
+  name         = "${var.instance_name}"
+  zone         = "${var.instance_zone}"
+  machine_type = "${var.instance_type}"
+  tags = ["${var.instance_tags}"]
+  boot_disk {
+    initialize_params {
+      image = "windows-cloud/windows-2016"
+	  }
+  }
+  network_interface {
+    subnetwork = "${var.instance_subnetwork}"
+  }
+  network_interface {
+    subnetwork = "default"
+  }
+}
+
+
+
+
+
+
+## Configurations for the instance vm-bastionhost
+#Make a new directory called bastionhost.
+#Create a new file called main.tf inside the bastionhost directory, and copy the following into the file,
+
+# Code inside bastionhost/main.tf
+variable "instance_name" {
+  }
+variable "instance_zone" {
+  default = "us-central1-a"
+  }
+variable "instance_type" {
+  default = "n1-standard-1"
+  }
+variable "instance_subnetwork" {
+}
+variable "instance_tags" {
+  }
+
+resource "google_compute_instance" "vm_instance" {
+  name         = "${var.instance_name}"
+  zone         = "${var.instance_zone}"
+  machine_type = "${var.instance_type}"
+  tags = ["${var.instance_tags}"]
+  boot_disk {
+    initialize_params {
+      image = "windows-cloud/windows-2016"
+	  }
+  }
+  network_interface {
+    subnetwork = "${var.instance_subnetwork}"
+    access_config {
+      # Allocate a one-to-one NAT IP to the instance
+    }
+  }
+  network_interface {
+    subnetwork = "default"
+  }
+}
+
+
+## Deploy the Terraform Configuration
+
+terraform fmt
+terraform init
+terraform plan
+
+terraform apply
