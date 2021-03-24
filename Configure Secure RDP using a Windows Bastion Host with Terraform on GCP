@@ -30,6 +30,7 @@ provider "google" {}
 
 
 
+
 ## Configurations for the non-default VPC securenetwork and its subnet and firewall rules
 
 # Create the securenetwork network
@@ -89,7 +90,6 @@ module "vm-bastionhost" {
   instance_tags = "bastion"
   instance_subnetwork = "${google_compute_subnetwork.securenetwork.self_link}"
 }
-
 
 
 
@@ -184,3 +184,7 @@ terraform init
 terraform plan
 
 terraform apply
+
+
+
+## For More Reference: https://chriskyfung.github.io/blog/qwiklabs/Configure-Windows-Bastion-Host-with-Terraform-on-GCP
