@@ -1,0 +1,24 @@
+#Create an auto mode VPC network with firewall rules
+-> For Name, type mynetwork
+-> For Subnet creation mode, click Automatic. Auto mode networks create subnets in each region automatically.
+-> For Firewall rules, select all available rules.
+
+#Create a VM instance in us-central1
+
+Property	Value (type value or select option as specified)
+Name	mynet-us-vm
+Region	us-central1
+Zone	us-central1-c
+Series	N1
+Machine type	n1-standard-1 (1 vCPU, 3.75 GB memory)
+Boot disk	Debian GNU/Linux 10 (buster)
+
+# Create a VM instance in europe-west1
+
+Property	Value (type value or select option as specified)
+Name	mynet-eu-vm
+Region	europe-west1
+Zone	europe-west1-b
+Series	N1
+Machine type	n1-standard-1 (1 vCPU, 3.75 GB memory)
+Boot disk	Debian GNU/Linux 10 (buster)
