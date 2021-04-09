@@ -1,0 +1,101 @@
+# Note : After Task 5 Not Woeking
+
+source <(gsutil cat gs://cloud-training/gsp318/marking/setup_marking.sh)
+export PROJECT=$YOUR_PROJECT_ID
+gcloud source repos clone valkyrie-app --project=$PROJECT
+
+
+cd valkyrie-app
+
+cat > Dockerfile <<EOF
+FROM golang:1.10
+WORKDIR /go/src/app
+COPY source .
+RUN go install -v
+ENTRYPOINT ["app","-single=true","-port=8080"]
+EOF
+
+docker build -t valkyrie-app:v0.0.1 .
+cd ~/marking
+./step1.sh
+
+
+
+# Task 2: Test the created Docker image
+
+docker run -p 8080:8080 --name valkyrie-app valkyrie-app:v0.0.1 &
+
+## Click Web Preview to see the running app.
+## open a new Cloud Shell to run the step2.sh marking script.
+cd ~/marking
+./step2.sh
+
+
+Task 3: Push the Docker image in the Container Repository
+
+docker tag valkyrie-app:v0.0.1 gcr.io/$PROJECT/valkyrie-app:v0.0.1
+docker images
+docker push gcr.io/$PROJECT/valkyrie-app:v0.0.1
+
+
+
+
+#Task 4: Create and expose a deployment in Kubernetes
+
+cd valkyrie-app/k8s
+gcloud container clusters get-credentials valkyrie-dev --region us-east1-d
+nano deployment.yaml
+
+## Use a text editor to modify deployment.yaml and replace IMAGE_HERE with 
+gcr.io/YOUR_PROJECT_ID/valkyrie-app:v0.0.1
+
+kubectl create -f deployment.yaml
+kubectl create -f service.yaml
+
+
+
+Task 5: Update the deployment with a new version of valkyrie-app
+
+nano deployment.yaml
+# Increase the replicas from 1 to 3
+
+cd
+cd ~/marking/valkyrie-app
+git merge origin/kurt-dev
+
+
+docker build -t valkyrie-app:v0.0.2 .
+docker tag valkyrie-app:v0.0.2 gcr.io/$PROJECT/valkyrie-app:v0.0.2
+docker images
+docker push gcr.io/$PROJECT/valkyrie-app:v0.0.2
+
+kubectl edit deployment valkyrie-dev
+#Change the image tag from v0.0.1 to v0.0.2. then save and exit.
+
+
+
+
+printf $(kubectl get secret cd-jenkins -o jsonpath="{.data.jenkins-admin-password}" | base64 --decode);echo
+
+export POD_NAME=$(kubectl get pods --namespace default -l "app.kubernetes.io/component=jenkins-master" -l "app.kubernetes.io/instance=cd" -o jsonpath="{.items[0].metadata.name}")
+kubectl port-forward $POD_NAME 8080:8080 >> /dev/null &
+
+#Click on the Web Preview button in cloud shell, then click “Preview on port 8080” to connect to the Jenkins console.
+-> Username: admin
+
+
+Task 6
+
+nano Jenkinsfile
+#replace YOUR_PROJECT with your GCP project ID.
+
+cd source
+vi html.go
+#change the color of headings from green to orange.
+
+git config --global user.email $PROJECT
+git config --global user.name $PROJECT
+
+git add *
+git commit -m 'green to orange'
+git push origin master
