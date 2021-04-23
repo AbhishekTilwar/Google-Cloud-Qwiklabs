@@ -1,0 +1,63 @@
+### config.yaml ###
+
+imports:
+- path: instance-template.jinja
+resources:
+# Create the mynet-us-vm instance
+- name: mynet-us-vm
+  type: instance-template.jinja
+  properties:
+    zone: us-central1-a
+    machineType: n1-standard-1
+    network: $(ref.mynetwork.selfLink)
+    subnetwork: regions/us-central1/subnetworks/mynetwork
+  
+# Create the mynet-eu-vm instance
+- name: mynet-eu-vm
+  type: instance-template.jinja
+  properties:
+    zone: europe-west1-d
+    machineType: n1-standard-1
+    network: $(ref.mynetwork.selfLink)  
+    subnetwork: regions/europe-west1/subnetworks/mynetwork
+# Create the auto-mode network
+- name: mynetwork
+  type: compute.v1.network
+  properties:
+    autoCreateSubnetworks: true
+
+# Create the firewall rule
+- name: mynetwork-allow-http-ssh-rdp-icmp
+  type: compute.v1.firewall
+  properties:
+    network: $(ref.mynetwork.selfLink)
+    sourceRanges: ["0.0.0.0/0"]
+    allowed:
+    - IPProtocol: TCP
+      ports: [22, 80, 3389]
+    - IPProtocol: ICMP
+    
+    
+    
+    
+###### instance-template.jinja #####
+
+  resources:
+- name: {{ env["name"] }}
+  type: compute.v1.instance  
+  properties:
+     machineType: zones/{{ properties["zone"] }}/machineTypes/{{ properties["machineType"] }}
+     zone: {{ properties["zone"] }}
+     networkInterfaces:
+      - network: {{ properties["network"] }}
+        subnetwork: {{ properties["subnetwork"] }}
+        accessConfigs:
+        - name: External NAT
+          type: ONE_TO_ONE_NAT
+     disks:
+      - deviceName: {{ env["name"] }}
+        type: PERSISTENT
+        boot: true
+        autoDelete: true
+        initializeParams:
+          sourceImage: https://www.googleapis.com/compute/v1/projects/debian-cloud/global/images/family/debian-9
