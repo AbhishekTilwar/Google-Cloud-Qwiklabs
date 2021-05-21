@@ -1,0 +1,58 @@
+gcloud auth list
+gcloud config list project
+
+gsutil -m cp -r gs://spls/gsp766/gke-qwiklab ~
+cd ~/gke-qwiklab
+
+gcloud config set compute/zone us-central1-a && gcloud container clusters get-credentials multi-tenant-cluster
+kubectl get namespace
+kubectl api-resources --namespaced=true
+kubectl get services --namespace=kube-system
+
+kubectl create namespace team-a && \
+kubectl create namespace team-b
+
+kubectl run app-server --image=centos --namespace=team-a -- sleep infinity && \
+kubectl run app-server --image=centos --namespace=team-b -- sleep infinity
+
+kubectl get pods -A
+
+
+#TASK-2
+kubectl describe pod app-server --namespace=team-a
+kubectl config set-context --current --namespace=team-a
+kubectl describe pod app-server
+
+gcloud projects add-iam-policy-binding ${GOOGLE_CLOUD_PROJECT} \
+--member=serviceAccount:team-a-dev@${GOOGLE_CLOUD_PROJECT}.iam.gserviceaccount.com  \
+--role=roles/container.clusterViewer
+
+kubectl create role pod-reader \
+--resource=pods --verb=watch --verb=get --verb=list
+
+cat developer-role.yaml
+kubectl create -f developer-role.yaml
+
+kubectl create rolebinding team-a-developers \
+--role=developer --user=team-a-dev@${GOOGLE_CLOUD_PROJECT}.iam.gserviceaccount.com
+
+gcloud iam service-accounts keys create /tmp/key.json --iam-account team-a-dev@${GOOGLE_CLOUD_PROJECT}.iam.gserviceaccount.com
+
+#TASK 3
+gcloud auth activate-service-account  --key-file=/tmp/key.json
+gcloud container clusters get-credentials multi-tenant-cluster --zone us-central1-a --project ${GOOGLE_CLOUD_PROJECT}
+kubectl get pods --namespace=team-a
+kubectl get pods --namespace=team-b
+gcloud container clusters get-credentials multi-tenant-cluster --zone us-central1-a --project ${GOOGLE_CLOUD_PROJECT}
+
+kubectl create quota test-quota \
+--hard=count/pods=2,count/services.loadbalancers=1 --namespace=team-a
+kubectl run app-server-2 --image=centos --namespace=team-a -- sleep infinity
+kubectl run app-server-3 --image=centos --namespace=team-a -- sleep infinity
+kubectl describe quota test-quota --namespace=team-a
+export KUBE_EDITOR="nano"
+kubectl edit quota test-quota --namespace=team-a
+cd gke-qwiklab
+kubectl create -f cpu-mem-quota.yaml
+kubectl create -f cpu-mem-demo-pod.yaml --namespace=team-a
+kubectl describe quota cpu-mem-quota --namespace=team-a
