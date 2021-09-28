@@ -1,6 +1,7 @@
 gcloud auth list
 gcloud config list project
 
+#Task1: Create VM instance manually.
 #Task 2: Install an NGINX web server
 sudo su -
 apt-get update
